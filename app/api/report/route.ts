@@ -34,14 +34,32 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ report });
 }
 
-// CSV IOC feed export.
-export async function GET() {
+// CSV IOC feed export. ?threadId= scopes to one thread; omitted = full feed.
+export async function GET(req: NextRequest) {
   const db = supabaseAdmin();
-  const { data: iocs } = await db.from("iocs").select("type,value,severity,confidence,created_at");
+  const threadId = req.nextUrl.searchParams.get("threadId");
+  let q = db.from("iocs").select("type,value,severity,confidence,created_at");
+  if (threadId) q = q.eq("thread_id", threadId);
+  const { data: iocs } = await q;
   const rows = ["type,value,severity,confidence,created_at"].concat(
     (iocs ?? []).map((i) => `${i.type},"${i.value}",${i.severity},${i.confidence},${i.created_at}`)
   );
   return new NextResponse(rows.join("\n"), {
     headers: { "content-type": "text/csv", "content-disposition": 'attachment; filename="iocs.csv"' },
   });
+}
+
+// Approve a drafted report (human-in-the-loop). PATCH { reportId }.
+export async function PATCH(req: NextRequest) {
+  const { reportId } = await req.json().catch(() => ({}));
+  if (!reportId) return NextResponse.json({ error: "reportId required" }, { status: 400 });
+  const db = supabaseAdmin();
+  const { data, error } = await db
+    .from("reports")
+    .update({ status: "approved" })
+    .eq("id", reportId)
+    .select("id, status")
+    .single();
+  if (error || !data) return NextResponse.json({ error: error?.message || "not found" }, { status: 404 });
+  return NextResponse.json({ report: data });
 }
