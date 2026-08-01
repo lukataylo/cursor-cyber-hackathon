@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Honeypot — scam-baiting threat intel",
-  description: "Autonomous agent that bait phishing scammers and harvests threat intelligence.",
+  description: "Autonomous agent that baits phishing scammers and harvests threat intelligence.",
 };
 
 export default function RootLayout({
