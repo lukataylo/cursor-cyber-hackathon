@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       body: email.body,
     });
 
-    const reply = await personaReply(subject, history as { direction: "inbound" | "outbound"; body: string }[]);
+    const reply = await personaReply(subject, history as { direction: "inbound" | "outbound"; body: string }[], email.from);
     await sendReply(email, reply);
     await recordOutbound(threadId, reply);
     results.push({ from: email.from, injection, replied: true });

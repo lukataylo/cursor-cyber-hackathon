@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     body,
   });
 
-  const reply = await personaReply(subj, history as { direction: "inbound" | "outbound"; body: string }[]);
+  const reply = await personaReply(subj, history as { direction: "inbound" | "outbound"; body: string }[], from);
   await recordOutbound(threadId, reply);
 
   return NextResponse.json({ threadId, injection, reply });

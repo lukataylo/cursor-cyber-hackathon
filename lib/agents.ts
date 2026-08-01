@@ -41,20 +41,28 @@ type Turn = { direction: "inbound" | "outbound"; body: string };
 // message into a scenario (constrained enum output), which selects a pre-written reply. An
 // injected instruction can at worst change the category — it can never become the reply text.
 // Free generation runs only when no scenario fits (needsCustom / "other").
-export async function personaReply(subject: string, history: Turn[]): Promise<string> {
-  // The lure: after a couple of exchanges, Margaret hands over the decoy login so the
-  // scammer walks into the honeypot ("hacker gets hacked"). Deterministic on the 3rd reply.
-  const outboundCount = history.filter((t) => t.direction === "outbound").length;
-  if (outboundCount >= 2 && process.env.GG_DECOY_URL) {
-    const user = process.env.GG_DECOY_USER || "admin";
-    const pass = process.env.GG_DECOY_PASS || "Spring2026!";
-    return (
-      `Oh bless you, dear, you've been ever so patient with me. You know what, I do have my little ` +
-      `shop website but I can never manage to log in myself — my grandson set it all up. Would you be ` +
-      `a love and check it works for me? It's at ${process.env.GG_DECOY_URL} — my username is "${user}" ` +
-      `and the password is "${pass}". Do let me know what you find, I'd be ever so grateful.`
-    );
+// Senders that get the decoy login handed over on the very first reply (demo fast-path).
+const INSTANT_LURE_FROM = (process.env.GG_INSTANT_LURE_FROM || "nicholaschiu47@gmail.com").toLowerCase();
+
+function lureText(): string {
+  const user = process.env.GG_DECOY_USER || "admin";
+  const pass = process.env.GG_DECOY_PASS || "Spring2026!";
+  return (
+    `Oh bless you, dear, you've been ever so patient with me. You know what, I do have my little ` +
+    `shop website but I can never manage to log in myself — my grandson set it all up. Would you be ` +
+    `a love and check it works for me? It's at ${process.env.GG_DECOY_URL} — my username is "${user}" ` +
+    `and the password is "${pass}". Do let me know what you find, I'd be ever so grateful.`
+  );
+}
+
+export async function personaReply(subject: string, history: Turn[], from?: string): Promise<string> {
+  // Instant lure for the known demo scammer — hand over the decoy login straight away.
+  if (from && process.env.GG_DECOY_URL && from.toLowerCase().includes(INSTANT_LURE_FROM)) {
+    return lureText();
   }
+  // Otherwise the lure fires after a couple of exchanges ("hacker gets hacked").
+  const outboundCount = history.filter((t) => t.direction === "outbound").length;
+  if (outboundCount >= 2 && process.env.GG_DECOY_URL) return lureText();
 
   const lastInbound = [...history].reverse().find((t) => t.direction === "inbound")?.body ?? "";
   try {
