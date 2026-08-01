@@ -48,6 +48,18 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ position: "relative", zIndex: 1 }}>
+      {/* Office-chaos goose background */}
+      <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: -1,
+          backgroundImage: "url(/login-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+      <div aria-hidden className="fixed inset-0 pointer-events-none" style={{ zIndex: -1, background: "rgba(6,7,9,0.68)" }} />
       <div className="glass-card w-full max-w-sm p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl" style={{ background: "var(--glass-2)", border: "1px solid var(--border)" }}>
