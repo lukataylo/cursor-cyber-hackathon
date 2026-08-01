@@ -1,50 +1,48 @@
-# Honeypot — autonomous scam-baiting threat-intel agent
+# GooseGuard
 
-An autonomous agent that engages phishing scammers over **email and voice**, wastes their
-time with a believable persona, and **extracts structured threat intelligence** (crypto
-wallets, mule bank accounts, phishing URLs, phone numbers) into a live monitoring dashboard —
-then auto-drafts takedown reports. Time-wasting is the collection method; the IOC feed is the product.
+**AI-powered counter-intelligence that turns scams into actionable threat intelligence.**
 
-Track: **Incident Response** (phishing investigations). Theme: AI-native cybersecurity.
+GooseGuard is an autonomous cybersecurity platform that fights back against scammers instead of simply blocking them. Rather than stopping attacks at the perimeter, GooseGuard actively engages malicious actors, wastes their time, collects intelligence on their infrastructure, and protects users through safe, injection-resistant AI agents.
 
-## Working
-- **Two channels, one brain.** Email (Gmail API poll → agent reply) and voice (Vapi call →
-  transcript) both feed one shared pipeline: extract IOCs → store → live dashboard.
-- **Autonomous persona agent** ("Margaret", Claude Sonnet 5) sustains multi-turn scam-bait
-  conversations and steers scammers into revealing payment details.
-- **IOC extractor** (schema-forced `generateObject`) pulls wallets/banks/URLs/phones/emails
-  with severity + evidence snippet, deduped per thread.
-- **Prompt-injection defence.** Inbound scammer text is wrapped as untrusted data; injection
-  attempts are flagged (`INJECTION BLOCKED`) and the agent stays in character.
-- **Live dashboard.** Realtime (Supabase) thread list, conversation view, IOC cards, and
-  counters: scammer minutes wasted, IOCs harvested, high/critical, active threads.
-- **Responsible-AI guardrails.** Never sends money/PII; takedown reports are **drafts pending
-  human approval**; engages inbound only. IOC feed exports as CSV.
-- `/api/simulate` drives the whole flow end-to-end with no live scammer — the stage demo path.
+## Live demo
 
-## Gaps / next
-- Gmail uses 60s cron polling, not Pub/Sub push (add `users.watch()` for lower latency).
-- Voice persona runs inside Vapi's live LLM; IOCs extracted at end-of-call, not mid-call.
-- Takedown reports are drafted, not filed (deliberate human-in-loop; wire real abuse-desk APIs next).
-- Dashboard is public-read for the demo; lock RLS down before real data.
+[honeypot-production-ef9f.up.railway.app](https://honeypot-production-ef9f.up.railway.app)
 
-## Tech stack
-Next.js 16 (App Router) · Vercel (functions + cron) · Supabase (Postgres + Realtime + RLS) ·
-Vercel AI Gateway → Claude Sonnet 5 · AI SDK v7 (`generateText` / `generateObject`) ·
-Gmail API (`googleapis`) · Vapi (voice) · Tailwind v4.
+## Stack
 
-## Setup
-1. `cp .env.example .env.local` and fill in keys (see `.env.example`).
-2. Supabase: run `supabase/schema.sql` in the SQL editor.
-3. Gmail: enable Gmail API, create OAuth web client, get a refresh token (scope
-   `https://mail.google.com/`) via the OAuth Playground.
-4. Vapi: create an assistant, paste the persona from `lib/persona.ts` (`PERSONA_SYSTEM`) as its
-   system prompt, attach a phone number, set Server URL → `https://<deploy>/api/voice/webhook`
-   and the secret → `VAPI_WEBHOOK_SECRET`.
-5. `npm run dev`, open the dashboard, then run `./scripts/seed.sh` (or deploy: `vercel`).
+Next.js 16 · Supabase · Vercel AI SDK + Claude · Vapi (voice) · Railway
 
-## Demo (3 min)
-Run `./scripts/seed.sh http://localhost:3000` — it fires three scam messages (including one
-prompt-injection attempt) at `/api/simulate`. Watch the dashboard: threads appear, the agent
-replies, IOC cards pop, the injection message shows `INJECTION BLOCKED`, counters tick. Then
-play the recorded voice-call clip, and hit **Draft takedown report**.
+## The Problem
+
+Modern cybercrime is now AI-powered. Scammers can generate convincing phishing emails, clone websites, automate voice calls, and attack thousands of victims simultaneously. Meanwhile, defenders are still largely reactive, spending countless hours investigating incidents after damage has already been done.
+
+Current security tools focus on detection. They rarely disrupt attackers, gather live intelligence, or safely deploy autonomous AI because LLMs interacting with attacker-controlled content are vulnerable to prompt injection.
+
+## Our Solution
+
+GooseGuard is AI-native deception infrastructure built for the next generation of cyber defence. Our autonomous security agents:
+
+- 📧 Reply to phishing emails with believable personas that keep scammers engaged
+- ☎️ Hold realistic phone conversations to waste scammer time at scale
+- 🌐 Generate dynamic honeypot websites that trap credential stuffing and phishing attacks
+- 🧠 Extract structured threat intelligence including wallets, mule accounts, phishing URLs and phone numbers
+- 📊 Surface intelligence in a live SOC dashboard with human-approved takedown reports
+- 🛡️ Remain injection-resistant by classifying attacker input into predefined scenarios instead of generating unrestricted responses
+
+## Why it matters
+
+Every minute an attacker spends talking to GooseGuard is a minute they are not targeting a real victim. By automating deception, intelligence gathering and evidence collection, GooseGuard shifts the economics of cybercrime.
+
+Instead of defenders constantly reacting to attacks, attackers are forced to spend time, infrastructure and resources fighting fake targets while organisations gain valuable intelligence to prevent future attacks.
+
+## Built for the AI era
+
+GooseGuard demonstrates what trustworthy autonomous cybersecurity looks like:
+
+- **Autonomous AI agents**
+- **Human-in-the-loop approval**
+- **Prompt injection resistant architecture**
+- **Real-time threat intelligence**
+- **Offensive deception at machine scale**
+
+Instead of simply detecting attacks, GooseGuard turns every attack into an opportunity to learn, delay, and defend.
