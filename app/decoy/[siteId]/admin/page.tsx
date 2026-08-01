@@ -259,7 +259,7 @@ function WpAdmin({
               <Table
                 head={["Order", "Customer", "Status", "Total"]}
                 rows={orders.map((o) => [
-                  "#" + s(o.payload.number, "—"),
+                  fmtOrder(o.payload.number),
                   s(o.payload.customer, "Guest"),
                   s(o.payload.status, "Processing"),
                   s(o.payload.total, "$0.00"),
@@ -525,6 +525,13 @@ function DrupalTable({ head, rows }: { head: string[]; rows: string[][] }) {
       </table>
     </div>
   );
+}
+
+// Render a WooCommerce-style order number without doubling the leading "#".
+function fmtOrder(v: unknown): string {
+  const raw = s(v, "");
+  if (!raw) return "—";
+  return raw.startsWith("#") ? raw : "#" + raw;
 }
 
 function fmtDate(iso: string): string {
