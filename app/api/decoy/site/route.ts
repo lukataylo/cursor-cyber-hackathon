@@ -77,10 +77,8 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error || !data) {
-    return NextResponse.json(
-      { error: error?.message || "insert failed" },
-      { status: 500 }
-    );
+    console.error("[site] insert failed:", error);
+    return NextResponse.json({ error: "could not create decoy" }, { status: 500 });
   }
 
   return NextResponse.json({

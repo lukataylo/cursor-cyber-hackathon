@@ -60,6 +60,26 @@ function shortUa(ua: string | null): string {
   return m ? m[0] : ua.slice(0, 28);
 }
 
+// Navigate a pre-opened tab to `path`, robustly. `win` was opened synchronously in
+// the click handler (so it isn't popup-blocked). We resolve to an ABSOLUTE url because
+// a fresh about:blank tab has no reliable base for relative paths. If the pre-opened
+// tab is missing (popups fully blocked) we try one more window.open, and as a last
+// resort navigate the current tab — so we never leave a dangling blank tab.
+function openInTab(win: Window | null, path: string | undefined) {
+  if (!path) return;
+  const abs =
+    typeof window !== "undefined"
+      ? new URL(path, window.location.origin).href
+      : path;
+  if (win && !win.closed) {
+    win.location.href = abs;
+    win.focus?.();
+    return;
+  }
+  const retry = window.open(abs, "_blank", "noopener");
+  if (!retry) window.location.assign(abs);
+}
+
 export default function Honeypots() {
   const db = useMemo(() => supabaseBrowser(), []);
   const [sites, setSites] = useState<Site[]>([]);
@@ -144,9 +164,8 @@ export default function Honeypots() {
           return;
         }
         setMimicUrl("");
-        if (j?.url && win) win.location.href = j.url as string;
-        else if (j?.url) window.open(j.url as string, "_blank");
         await load();
+        openInTab(win, (j?.url as string | undefined) ?? "/decoy/" + j?.siteId);
       } catch {
         win?.close();
         alert("Could not deploy decoy");
@@ -187,10 +206,8 @@ export default function Honeypots() {
         return;
       }
       setMimicUrl("");
-      const adminUrl = "/decoy/" + j.siteId + "/admin";
-      if (win) win.location.href = adminUrl;
-      else window.open(adminUrl, "_blank");
       await load();
+      openInTab(win, "/decoy/" + j.siteId + "/admin");
     } catch {
       win?.close();
       alert("Could not deploy demo");
@@ -309,7 +326,10 @@ function DeployControl({
 
 function ScanOverlay({ scan }: { scan: { target: string; step: number; done: boolean } }) {
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center p-6">
+    // pointer-events-none: this overlay is purely a progress indicator with no
+    // interactive elements, so it must never intercept clicks on the page beneath
+    // (e.g. the site-card "Open holding page" links) while it is shown or fading out.
+    <div className="fixed inset-0 z-30 flex items-center justify-center p-6 pointer-events-none">
       <div className="absolute inset-0 backdrop-blur-scrim" />
       <div className="glass-card relative w-full max-w-md p-7">
         <div className="flex items-center gap-3 mb-1">

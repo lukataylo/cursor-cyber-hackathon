@@ -190,8 +190,9 @@ export default function Dashboard() {
       {/* Top nav */}
       <header className="flex items-center justify-between px-6 py-4 gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl" style={{ background: "var(--glass-2)", border: "1px solid var(--border)" }}>
-            🦢
+          <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0" style={{ border: "1px solid var(--border)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/goose-icon.png" alt="GooseGuard" className="w-full h-full" style={{ objectFit: "cover" }} />
           </div>
           <div>
             <div className="text-lg font-bold tracking-tight">GooseGuard</div>
@@ -250,7 +251,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-xs mt-1" style={{ color: "var(--faint)" }}>Attacker logins captured on live decoys</div>
               </StatCard>
-              <StatCard title="Intel Extracted" icon="🗄" goose="/goose-callcentre.jpeg">
+              <StatCard title="Intel Extracted" icon="🗄" goose="/goose-callcentre.jpeg" bg="#161616">
                 <div className="flex gap-6">
                   <div>
                     <div className="text-4xl font-bold tracking-tight">{iocs.length}</div>
@@ -424,17 +425,31 @@ function StatCard({
   flip?: boolean;
   bg?: string;
 }) {
+  // Per-goose framing: object-fit cover crops the black sides so the goose
+  // fills the tile with no letterbox seam. objectPosition (and optional scale)
+  // frame each goose — head kept, feet near the bottom.
+  const FRAMING: Record<string, { objectPosition: string; scale?: number }> = {
+    "/goose-worker.jpeg": { objectPosition: "50% 30%" },
+    "/goose-hoodie.jpeg": { objectPosition: "50% 32%" },
+    "/goose-callcentre.jpeg": { objectPosition: "50% 40%" },
+  };
+  const frame = FRAMING[goose] ?? { objectPosition: "50% 30%" };
+  const scale = frame.scale ?? 1;
+  const transform = [flip ? "scaleX(-1)" : "", scale !== 1 ? `scale(${scale})` : ""]
+    .filter(Boolean)
+    .join(" ") || undefined;
+
   return (
     <div className="overflow-hidden rounded-2xl" style={{ background: bg, border: "1px solid var(--border)" }}>
       <div className="flex items-stretch" style={{ minHeight: 172 }}>
-        {/* Standing goose on its native black background, left side */}
-        <div className="shrink-0 self-stretch" style={{ width: "38%" }}>
+        {/* Standing goose, cover-cropped to fill the left column (no letterbox seam) */}
+        <div className="shrink-0 self-stretch overflow-hidden" style={{ width: "38%" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={goose}
             alt=""
             className="h-full w-full"
-            style={{ objectFit: "contain", objectPosition: "left bottom", transform: flip ? "scaleX(-1)" : undefined }}
+            style={{ objectFit: "cover", objectPosition: frame.objectPosition, transform }}
           />
         </div>
         {/* Stats on the right */}
