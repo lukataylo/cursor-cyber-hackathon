@@ -1,12 +1,13 @@
+![GooseGuard — Honk Back](public/goose-guard-banner.png)
+
 # GooseGuard
 
 **AI-powered counter-intelligence that turns scams into actionable threat intelligence.**
 
+### 🔗 Live demo: **https://honeypot-production-ef9f.up.railway.app/**
+Demo login (if prompted): **`demo`** / **`demo`**
+
 GooseGuard is an autonomous cybersecurity platform that fights back against scammers instead of simply blocking them. Rather than stopping attacks at the perimeter, GooseGuard actively engages malicious actors, wastes their time, collects intelligence on their infrastructure, and protects users through safe, injection-resistant AI agents.
-
-## Live demo
-
-[honeypot-production-ef9f.up.railway.app](https://honeypot-production-ef9f.up.railway.app)
 
 ## Stack
 
