@@ -1,26 +1,160 @@
 @import "tailwindcss";
 
+/* Glassmorphic dark console — a committed single-theme visual world. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #08090b;
+  --text: #f3f4f6;
+  --muted: #8b909b;
+  --faint: #6b7079;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-hi: rgba(255, 255, 255, 0.14);
+
+  /* glass surfaces */
+  --glass: rgba(26, 28, 34, 0.55);
+  --glass-2: rgba(255, 255, 255, 0.045);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(15, 17, 21, 0.985);
+  --panel: rgba(255, 255, 255, 0.045);
+  --panel-2: rgba(255, 255, 255, 0.08);
+
+  /* semantic */
+  --accent: #59e08a;
+  --danger: #ff6b6b;
+  --danger-ink: #2a0b0b;
+  --warn: #f5c451;
+  --ai: #8b7bf7;
+  --ai-soft: rgba(139, 123, 247, 0.14);
+
+  --mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+/* Ambient light so the glass has something to refract */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  background:
+    radial-gradient(38% 38% at 18% 22%, rgba(80, 130, 170, 0.20), transparent 70%),
+    radial-gradient(46% 46% at 82% 26%, rgba(120, 95, 175, 0.16), transparent 72%),
+    radial-gradient(55% 55% at 62% 96%, rgba(60, 155, 130, 0.14), transparent 72%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---- glass primitives ---- */
+.app-window {
+  position: relative;
+  z-index: 1;
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow:
+    0 30px 80px -20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: var(--glass-2);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.glass-card:hover {
+  background: var(--glass-hover);
+  border-color: var(--border-hi);
+  transform: translateY(-1px);
+}
+
+.drawer-panel {
+  background: var(--glass-strong);
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
+  border-left: 1px solid var(--border-hi);
+  box-shadow: -24px 0 70px -20px rgba(0, 0, 0, 0.8);
+}
+
+.backdrop-blur-scrim {
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* traffic lights */
+.traffic {
+  display: flex;
+  gap: 8px;
+}
+.traffic i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+.traffic i:nth-child(1) { background: #ff5f57; }
+.traffic i:nth-child(2) { background: #febc2e; }
+.traffic i:nth-child(3) { background: #28c840; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+.drawer { transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+
+@keyframes flash-in {
+  from { box-shadow: 0 0 0 1px var(--danger), 0 0 22px -2px var(--danger); }
+  to { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+}
+.flash { animation: flash-in 1.4s ease-out; }
+
+@keyframes ai-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.ai-banner {
+  background: linear-gradient(100deg, var(--ai-soft), rgba(139, 123, 247, 0.03), var(--ai-soft));
+  background-size: 200% 100%;
+  animation: ai-shimmer 7s linear infinite;
+  border: 1px solid color-mix(in srgb, var(--ai) 32%, transparent);
+}
+@keyframes ai-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.9); }
+}
+.ai-spark { animation: ai-pulse 2.4s ease-in-out infinite; display: inline-block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer, .glass-card { transition: none; }
+  .flash, .live-dot, .ai-banner, .ai-spark { animation: none; }
 }
